@@ -30,15 +30,15 @@ export const updateBoardById = async (req, res) => {
   if (rows.length === 0) {
     res.status(404).send('Not found')
   }
-  const { name } = req.body
+  const { title } = req.body
   try {
     const { rows } = await db.query(
       `UPDATE board
-      SET name = $1
+      SET title = $1
       WHERE id = $2
       RETURNING *`,
       [
-        name,
+        title,
         id,
       ]
     )
@@ -49,11 +49,36 @@ export const updateBoardById = async (req, res) => {
 }
 
 export const createBoard = async (req, res) => {
-  const { name } = req.body
+  const { title } = req.body
   try {
-    const { rows } = await db.query('INSERT INTO board (name, created_date) VALUES($1, NOW()) RETURNING *', [
-      name,
+    const { rows } = await db.query('INSERT INTO board (title, created_date) VALUES($1, NOW()) RETURNING *', [
+      title,
     ])
+    res.json(rows[0])
+  } catch (error) {
+    res.status(400).json(error.message)
+  }
+}
+
+export const updateCardListIdOrderOfBoard = async (req, res) => {
+  const { boardId } = req.params
+  const { rows } = await db.query('SELECT * FROM board WHERE id = $1', [boardId])
+  if (rows.length === 0) {
+    res.status(404).send('Not found')
+  }
+  const { card_list_ids_order } = req.body
+
+  try {
+    const { rows } = await db.query(
+      `UPDATE board
+      SET card_list_ids_order = $1
+      WHERE id = $2
+      RETURNING *`,
+      [
+        card_list_ids_order,
+        boardId,
+      ]
+    )
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)
