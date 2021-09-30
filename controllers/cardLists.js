@@ -47,7 +47,10 @@ export const deleteCardListById = async (req, res) => {
   if (rows.length === 0) {
     res.status(404).send('Not found')
   }
+
+  const { board_id } = rows[0]
   await db.query('DELETE FROM card_list WHERE id = $1', [id])
+  await db.query('UPDATE board SET card_list_ids_order = array_remove(card_list_ids_order, $1) where id = $2', [id, board_id])
   res.status(200).send('Success')
 }
 
@@ -57,15 +60,17 @@ export const updateCardListById = async (req, res) => {
   if (rows.length === 0) {
     res.status(404).send('Not found')
   }
-  const { title } = req.body
+  const { title, board_id } = req.body
   try {
     const { rows } = await db.query(
       `UPDATE card_list
-      SET title = $1
-      WHERE id = $2
+      SET title = $1,
+      board_id = $2
+      WHERE id = $3
       RETURNING *`,
       [
         title,
+        board_id,
         id,
       ]
     )
