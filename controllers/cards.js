@@ -49,13 +49,13 @@ export const createCardByCardListId = async (req, res) => {
       res.status(404).send('Not found')
     }
 
-    const { rows } = await db.query('INSERT INTO card (content, card_list_id, created_date) VALUES($1, $2, NOW()) RETURNING *', [
+    const { rows } = await db.query('INSERT INTO card (content, card_list_id, created_date, last_update_date) VALUES($1, $2, NOW(), NOW()) RETURNING *', [
       content,
       cardListId,
     ])
 
     const cardId = rows[0].id
-    await db.query('UPDATE card_list SET card_ids_order = array_append(card_ids_order, $1) WHERE id = $2', [
+    await db.query('UPDATE card_list SET card_ids_order = array_append(card_ids_order, $1), last_update_date = NOW() WHERE id = $2', [
       cardId,
       cardListId,
     ])
@@ -75,7 +75,7 @@ export const deleteCardById = async (req, res) => {
 
   const { card_list_id } = rows[0]
   await db.query('DELETE FROM card WHERE id = $1', [id])
-  await db.query('UPDATE card_list SET card_ids_order = array_remove(card_ids_order, $1) where id = $2', [id, card_list_id])
+  await db.query('UPDATE card_list SET card_ids_order = array_remove(card_ids_order, $1), last_update_date = NOW() where id = $2', [id, card_list_id])
   res.status(200).send('Success')
 }
 
@@ -90,7 +90,8 @@ export const updateCardById = async (req, res) => {
     const { rows } = await db.query(
       `UPDATE card
       SET content = $1,
-      card_list_id = $2
+      card_list_id = $2,
+      last_update_date = NOW()
       WHERE id = $3
       RETURNING *`,
       [

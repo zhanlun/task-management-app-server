@@ -24,13 +24,13 @@ export const createCardListByBoardId = async (req, res) => {
       res.status(404).send('Not found')
     }
 
-    const { rows } = await db.query('INSERT INTO card_list (title, board_id, created_date) VALUES($1, $2, NOW()) RETURNING *', [
+    const { rows } = await db.query('INSERT INTO card_list (title, board_id, created_date, last_update_date) VALUES($1, $2, NOW(), NOW()) RETURNING *', [
       title,
       boardId,
     ])
 
     const cardListId = rows[0].id
-    await db.query('UPDATE board SET card_list_ids_order = array_append(card_list_ids_order, $1) WHERE id = $2', [
+    await db.query('UPDATE board SET card_list_ids_order = array_append(card_list_ids_order, $1), last_update_date = NOW() WHERE id = $2', [
       cardListId,
       boardId,
     ])
@@ -50,7 +50,7 @@ export const deleteCardListById = async (req, res) => {
 
   const { board_id } = rows[0]
   await db.query('DELETE FROM card_list WHERE id = $1', [id])
-  await db.query('UPDATE board SET card_list_ids_order = array_remove(card_list_ids_order, $1) where id = $2', [id, board_id])
+  await db.query('UPDATE board SET card_list_ids_order = array_remove(card_list_ids_order, $1), last_update_date = NOW() where id = $2', [id, board_id])
   res.status(200).send('Success')
 }
 
@@ -65,7 +65,8 @@ export const updateCardListById = async (req, res) => {
     const { rows } = await db.query(
       `UPDATE card_list
       SET title = $1,
-      board_id = $2
+      board_id = $2,
+      last_update_date = NOW()
       WHERE id = $3
       RETURNING *`,
       [
@@ -91,7 +92,8 @@ export const updateCardIdOrderOfCardList = async (req, res) => {
   try {
     const { rows } = await db.query(
       `UPDATE card_list
-      SET card_ids_order = $1
+      SET card_ids_order = $1,
+      last_update_date = NOW()
       WHERE id = $2
       RETURNING *`,
       [
