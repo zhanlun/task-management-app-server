@@ -44,7 +44,7 @@ export const createCardListByBoardId = async (req, res) => {
       cardListId,
       boardId,
     ])
-
+    req.app.get('socketService').emitter('card_list:create', rows[0], rows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)
@@ -61,6 +61,7 @@ export const deleteCardListById = async (req, res) => {
   const { board_id } = rows[0]
   await db.query('DELETE FROM card_list WHERE id = $1', [id])
   await db.query('UPDATE board SET card_list_ids_order = array_remove(card_list_ids_order, $1), last_update_date = NOW() where id = $2', [id, board_id])
+  req.app.get('socketService').emitter('card_list:delete', rows[0].id, rows[0].board_id)
   res.status(200).send('Success')
 }
 
@@ -70,21 +71,24 @@ export const updateCardListById = async (req, res) => {
   if (rows.length === 0) {
     res.status(404).send('Not found')
   }
-  const { title, board_id } = req.body
+  const { title, board_id, card_ids_order } = req.body
   try {
     const { rows } = await db.query(
       `UPDATE card_list
       SET title = $1,
       board_id = $2,
+      card_ids_order = $3,
       last_update_date = NOW()
-      WHERE id = $3
+      WHERE id = $4
       RETURNING *`,
       [
         title,
         board_id,
+        card_ids_order,
         id,
       ]
     )
+    req.app.get('socketService').emitter('card_list:update', rows[0], rows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)
@@ -111,6 +115,7 @@ export const updateCardIdOrderOfCardList = async (req, res) => {
         cardListId,
       ]
     )
+    req.app.get('socketService').emitter('card_list:update', rows[0], rows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)

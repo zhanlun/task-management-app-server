@@ -60,7 +60,7 @@ export const createCardByCardListId = async (req, res) => {
       cardId,
       cardListId,
     ])
-
+    req.app.get('socketService').emitter('card:create', rows[0], cardListRows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)
@@ -77,6 +77,7 @@ export const deleteCardById = async (req, res) => {
   const { card_list_id } = rows[0]
   await db.query('DELETE FROM card WHERE id = $1', [id])
   await db.query('UPDATE card_list SET card_ids_order = array_remove(card_ids_order, $1), last_update_date = NOW() where id = $2', [id, card_list_id])
+  req.app.get('socketService').emitter('card:delete', rows[0].id, rows[0].board_id)
   res.status(200).send('Success')
 }
 
@@ -101,6 +102,7 @@ export const updateCardById = async (req, res) => {
         id,
       ]
     )
+    req.app.get('socketService').emitter('card:update', rows[0], rows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)
