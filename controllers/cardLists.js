@@ -15,6 +15,16 @@ export const getCardListsByBoardId = async (req, res) => {
   }
 }
 
+export const getCardListById = async (req, res) => {
+  const { id } = req.params
+  try {
+    const { rows } = await db.query('SELECT * FROM card_list WHERE id = $1', [id])
+    res.json(rows[0])
+  } catch (error) {
+    res.status(400).json(error.message)
+  }
+}
+
 export const createCardListByBoardId = async (req, res) => {
   const { boardId } = req.params
   const { title } = req.body
@@ -24,17 +34,17 @@ export const createCardListByBoardId = async (req, res) => {
       res.status(404).send('Not found')
     }
 
-    const { rows } = await db.query('INSERT INTO card_list (title, board_id, created_date) VALUES($1, $2, NOW()) RETURNING *', [
+    const { rows } = await db.query('INSERT INTO card_list (title, board_id, created_date, last_update_date) VALUES($1, $2, NOW(), NOW()) RETURNING *', [
       title,
       boardId,
     ])
 
     const cardListId = rows[0].id
-    await db.query('UPDATE board SET card_list_ids_order = array_append(card_list_ids_order, $1) WHERE id = $2', [
+    await db.query('UPDATE board SET card_list_ids_order = array_append(card_list_ids_order, $1), last_update_date = NOW() WHERE id = $2', [
       cardListId,
       boardId,
     ])
-
+    req.app.get('socketService').emitter('card_list:create', rows[0], rows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)
@@ -50,7 +60,8 @@ export const deleteCardListById = async (req, res) => {
 
   const { board_id } = rows[0]
   await db.query('DELETE FROM card_list WHERE id = $1', [id])
-  await db.query('UPDATE board SET card_list_ids_order = array_remove(card_list_ids_order, $1) where id = $2', [id, board_id])
+  await db.query('UPDATE board SET card_list_ids_order = array_remove(card_list_ids_order, $1), last_update_date = NOW() where id = $2', [id, board_id])
+  req.app.get('socketService').emitter('card_list:delete', rows[0].id, rows[0].board_id)
   res.status(200).send('Success')
 }
 
@@ -60,20 +71,24 @@ export const updateCardListById = async (req, res) => {
   if (rows.length === 0) {
     res.status(404).send('Not found')
   }
-  const { title, board_id } = req.body
+  const { title, board_id, card_ids_order } = req.body
   try {
     const { rows } = await db.query(
       `UPDATE card_list
       SET title = $1,
-      board_id = $2
-      WHERE id = $3
+      board_id = $2,
+      card_ids_order = $3,
+      last_update_date = NOW()
+      WHERE id = $4
       RETURNING *`,
       [
         title,
         board_id,
+        card_ids_order,
         id,
       ]
     )
+    req.app.get('socketService').emitter('card_list:update', rows[0], rows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)
@@ -91,7 +106,8 @@ export const updateCardIdOrderOfCardList = async (req, res) => {
   try {
     const { rows } = await db.query(
       `UPDATE card_list
-      SET card_ids_order = $1
+      SET card_ids_order = $1,
+      last_update_date = NOW()
       WHERE id = $2
       RETURNING *`,
       [
@@ -99,6 +115,7 @@ export const updateCardIdOrderOfCardList = async (req, res) => {
         cardListId,
       ]
     )
+    req.app.get('socketService').emitter('card_list:update', rows[0], rows[0].board_id)
     res.json(rows[0])
   } catch (error) {
     res.status(400).json(error.message)

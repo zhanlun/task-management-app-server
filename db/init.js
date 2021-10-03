@@ -6,7 +6,8 @@ export const initDb = async () => {
       id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
       title VARCHAR(50) NOT NULL,
       card_list_ids_order uuid [] DEFAULT '{}',
-      created_date TIMESTAMP NOT NULL
+      created_date TIMESTAMP NOT NULL,
+      last_update_date TIMESTAMP NOT NULL
       )`,
     [],
   )
@@ -18,7 +19,8 @@ export const initDb = async () => {
       board_id uuid REFERENCES board (id) ON DELETE CASCADE,
       title VARCHAR(50) NOT NULL,
       card_ids_order uuid [] DEFAULT '{}',
-      created_date TIMESTAMP NOT NULL
+      created_date TIMESTAMP NOT NULL,
+      last_update_date TIMESTAMP NOT NULL
     )
     `,
     []
@@ -29,8 +31,10 @@ export const initDb = async () => {
       CREATE TABLE IF NOT EXISTS card (
       id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
       card_list_id uuid REFERENCES card_list (id) ON DELETE CASCADE,
+      board_id uuid,
       content VARCHAR(255) NOT NULL,
-      created_date TIMESTAMP NOT NULL
+      created_date TIMESTAMP NOT NULL,
+      last_update_date TIMESTAMP NOT NULL
     )
     `,
     []
