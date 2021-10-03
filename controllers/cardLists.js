@@ -15,6 +15,16 @@ export const getCardListsByBoardId = async (req, res) => {
   }
 }
 
+export const getCardListById = async (req, res) => {
+  const { id } = req.params
+  try {
+    const { rows } = await db.query('SELECT * FROM card_list WHERE id = $1', [id])
+    res.json(rows[0])
+  } catch (error) {
+    res.status(400).json(error.message)
+  }
+}
+
 export const createCardListByBoardId = async (req, res) => {
   const { boardId } = req.params
   const { title } = req.body
