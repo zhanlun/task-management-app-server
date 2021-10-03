@@ -49,9 +49,10 @@ export const createCardByCardListId = async (req, res) => {
       res.status(404).send('Not found')
     }
 
-    const { rows } = await db.query('INSERT INTO card (content, card_list_id, created_date, last_update_date) VALUES($1, $2, NOW(), NOW()) RETURNING *', [
+    const { rows } = await db.query('INSERT INTO card (content, card_list_id, board_id, created_date, last_update_date) VALUES($1, $2, $3, NOW(), NOW()) RETURNING *', [
       content,
       cardListId,
+      cardListRows[0].board_id,
     ])
 
     const cardId = rows[0].id
