@@ -1,3 +1,4 @@
+import { getHashedPassword } from '../auth/util.js'
 import db from './index.js'
 
 export const initDb = async () => {
@@ -35,8 +36,44 @@ export const initDb = async () => {
       content VARCHAR(255) NOT NULL,
       created_date TIMESTAMP NOT NULL,
       last_update_date TIMESTAMP NOT NULL
-    )
+      )
+      `,
+    []
+  )
+
+  await db.query(
+    `
+      CREATE TABLE IF NOT EXISTS app_user (
+        id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+        username VARCHAR(50) NOT NULL,
+        password VARCHAR(255) NOT NULL
+      )
     `,
     []
   )
+
+  await createDemoUser()
+}
+
+const createDemoUser = async () => {
+  const { rows } = await db.query(
+    `
+      SELECT * FROM app_user WHERE username = 'demo'
+    `,
+    []
+  )
+
+  const hashedPassword = await getHashedPassword('reactdemo')
+
+  if (rows.length === 0) {
+    await db.query(
+      `
+        INSERT INTO app_user (username, password) VALUES ($1, $2)
+      `,
+      [
+        'demo',
+        hashedPassword,
+      ]
+    )
+  }
 }
