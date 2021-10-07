@@ -27,3 +27,20 @@ export function authenticateToken(req, res, next) {
     next()
   })
 }
+
+export function authenticateTokenOptional(req, res, next) {
+  const authHeader = req.headers['authorization']
+  const token = authHeader
+
+  if (!token) {
+    next()
+  } else {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+      console.log(err)
+      if (err) return res.sendStatus(403)
+      req.user = user
+      next()
+    })
+  }
+
+}

@@ -9,7 +9,8 @@ export const initDb = async () => {
       card_list_ids_order uuid [] DEFAULT '{}',
       created_date TIMESTAMP NOT NULL,
       last_update_date TIMESTAMP NOT NULL,
-      created_by uuid NOT NULL
+      created_by uuid NOT NULL,
+      disable_public_edit BOOLEAN NOT NULL DEFAULT FALSE
       )`,
     [],
   )
