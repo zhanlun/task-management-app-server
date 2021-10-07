@@ -54,10 +54,12 @@ export const updateBoardById = async (req, res) => {
 }
 
 export const createBoard = async (req, res) => {
+  const { user } = req
   const { title } = req.body
   try {
-    const { rows } = await db.query('INSERT INTO board (title, created_date, last_update_date) VALUES($1, NOW(), NOW()) RETURNING *', [
+    const { rows } = await db.query('INSERT INTO board (title, created_by, created_date, last_update_date) VALUES($1, $2, NOW(), NOW()) RETURNING *', [
       title,
+      user.id,
     ])
     res.json(rows[0])
   } catch (error) {

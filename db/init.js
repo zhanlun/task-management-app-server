@@ -8,7 +8,8 @@ export const initDb = async () => {
       title VARCHAR(50) NOT NULL,
       card_list_ids_order uuid [] DEFAULT '{}',
       created_date TIMESTAMP NOT NULL,
-      last_update_date TIMESTAMP NOT NULL
+      last_update_date TIMESTAMP NOT NULL,
+      created_by uuid NOT NULL
       )`,
     [],
   )

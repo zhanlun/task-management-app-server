@@ -17,17 +17,26 @@ export const loginUser = async (req, res) => {
   }
 
   const user = {
-    username
+    username,
+    id: rows[0].id,
   }
   const accessToken = generateAccessToken(user)
-  return res.json({ accessToken: accessToken })
+  return res.json({ ...user, accessToken: accessToken })
 }
 
 export const loadUser = async (req, res) => {
-  const user = req.user
-  const accessToken = generateAccessToken({
-    username: user.username
-  })
+  const userId = req.user.id
+  const { rows } = await db.query('SELECT * FROM app_user WHERE id = $1', [userId])
+
+  if (rows.length === 0) {
+    return res.status(404).send('User not found')
+  }
+
+  const user = {
+    username: rows[0].username,
+    id: rows[0].id,
+  }
+  const accessToken = generateAccessToken(user)
   return res.json({ ...user, accessToken })
 }
 
@@ -48,21 +57,23 @@ export const signUpUser = async (req, res) => {
   const hashedPassword = await getHashedPassword(password)
 
   try {
-    await db.query(
+    const { rows } = await db.query(
       `
         INSERT INTO app_user (username, password) VALUES ($1, $2)
+        RETURNING *
       `,
       [
         username,
         hashedPassword,
       ]
     )
+    const user = {
+      username,
+      id: rows[0].id,
+    }
+    const accessToken = generateAccessToken(user)
+    return res.json({ ...user, accessToken: accessToken })
   } catch (error) {
     return res.status(500).json(error.message)
   }
-  const user = {
-    username
-  }
-  const accessToken = generateAccessToken(user)
-  return res.json({ accessToken: accessToken })
 }
