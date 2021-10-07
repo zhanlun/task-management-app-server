@@ -23,6 +23,14 @@ export const loginUser = async (req, res) => {
   return res.json({ accessToken: accessToken })
 }
 
+export const loadUser = async (req, res) => {
+  const user = req.user
+  const accessToken = generateAccessToken({
+    username: user.username
+  })
+  return res.json({ ...user, accessToken })
+}
+
 export const signUpUser = async (req, res) => {
   // Authenticate User
   const { username, password } = req.body
