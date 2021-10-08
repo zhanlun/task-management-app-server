@@ -1,7 +1,8 @@
 import db from '../db/index.js'
 
 export const getBoards = async (req, res) => {
-  const { rows } = await db.query('SELECT * FROM board', [])
+  const { user } = req
+  const { rows } = await db.query('SELECT * FROM board WHERE created_by = $1', [user.id])
   res.json(rows)
 }
 
@@ -31,18 +32,20 @@ export const updateBoardById = async (req, res) => {
   if (rows.length === 0) {
     res.status(404).send('Not found')
   }
-  const { title, card_list_ids_order } = req.body
+  const { title, card_list_ids_order, disable_public_edit } = req.body
   try {
     const { rows } = await db.query(
       `UPDATE board
       SET title = $1,
       card_list_ids_order = $2,
+      disable_public_edit = $3,
       last_update_date = NOW()
-      WHERE id = $3
+      WHERE id = $4
       RETURNING *`,
       [
         title,
         card_list_ids_order,
+        disable_public_edit,
         id,
       ]
     )
@@ -54,10 +57,12 @@ export const updateBoardById = async (req, res) => {
 }
 
 export const createBoard = async (req, res) => {
+  const { user } = req
   const { title } = req.body
   try {
-    const { rows } = await db.query('INSERT INTO board (title, created_date, last_update_date) VALUES($1, NOW(), NOW()) RETURNING *', [
+    const { rows } = await db.query('INSERT INTO board (title, created_by, created_date, last_update_date) VALUES($1, $2, NOW(), NOW()) RETURNING *', [
       title,
+      user.id,
     ])
     res.json(rows[0])
   } catch (error) {
