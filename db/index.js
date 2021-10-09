@@ -1,10 +1,13 @@
 import pg from 'pg'
 const { Pool } = pg
 
-const connectionString = process.env.connectionString || 'postgresql://postgres:123456@localhost:5432/task_management_app'
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:123456@localhost:5432/task_management_app'
 
 const pool = new Pool({
   connectionString,
+  ssl: {
+    rejectUnauthorized: false
+  }
 })
 
 export default {
