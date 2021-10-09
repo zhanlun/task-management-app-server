@@ -1,6 +1,5 @@
 import express from "express";
 import { createServer } from "http";
-import { Server } from "socket.io";
 import cors from 'cors';
 import { applyRoutes } from "./routes/index.js";
 import { initDb } from "./db/init.js";
