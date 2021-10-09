@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index"
+    "devStart": "nodemon index",
+    "start": "node index",
+    "db:drop": "node db/reset"
   },
   "keywords": [],
   "author": "",
