@@ -8,7 +8,7 @@ const dbConfig = {
 }
 
 if (process.env.NODE_ENV === 'production') {
-  dbConfig[ssl] = {
+  dbConfig.ssl = {
     rejectUnauthorized: false
   }
 }
