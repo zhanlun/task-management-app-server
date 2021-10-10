@@ -4,7 +4,7 @@ class SocketService {
   constructor(server) {
     this.io = new Server(server, {
       cors: {
-        origin: "http://localhost:3000",
+        origin: ["http://localhost:3000", "https://zl-task.netlify.app"],
         methods: ["GET", "POST", "PATCH", "DELETE", "PUT"]
       }
     })
