@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import dotenv from 'dotenv'
 
 if (process.env.NODE_ENV !== 'production') {
-  import dotenv from 'dotenv'
   dotenv.config()
 }
 
