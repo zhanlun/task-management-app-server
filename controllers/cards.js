@@ -1,7 +1,11 @@
 import db from '../db/index.js'
+import validator from 'validator';
 
 export const getCardsByBoardId = async (req, res) => {
   const { boardId } = req.params
+  if (!validator.isUUID(boardId)) {
+    return res.status(404).send('Not found')
+  }
   try {
     const { rows: boardRows } = await db.query('SELECT * FROM board WHERE id = $1', [boardId])
     if (boardRows.length === 0) {
@@ -27,6 +31,9 @@ export const getCardsByBoardId = async (req, res) => {
 
 export const getCardsByCardListId = async (req, res) => {
   const { cardListId } = req.params
+  if (!validator.isUUID(cardListId)) {
+    return res.status(404).send('Not found')
+  }
   try {
     const { rows: cardListRows } = await db.query('SELECT * FROM card_list WHERE id = $1', [cardListId])
     if (cardListRows.length === 0) {
@@ -42,6 +49,9 @@ export const getCardsByCardListId = async (req, res) => {
 
 export const createCardByCardListId = async (req, res) => {
   const { cardListId } = req.params
+  if (!validator.isUUID(cardListId)) {
+    return res.status(404).send('Not found')
+  }
   const { content } = req.body
   try {
     const { rows: cardListRows } = await db.query('SELECT * FROM card_list WHERE id = $1', [cardListId])
@@ -69,6 +79,9 @@ export const createCardByCardListId = async (req, res) => {
 
 export const deleteCardById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM card WHERE id = $1', [id])
   if (rows.length === 0) {
     res.status(404).send('Not found')
@@ -83,6 +96,9 @@ export const deleteCardById = async (req, res) => {
 
 export const updateCardById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM card WHERE id = $1', [id])
   if (rows.length === 0) {
     res.status(404).send('Not found')

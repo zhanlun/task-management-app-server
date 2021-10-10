@@ -1,4 +1,5 @@
 import db from '../db/index.js'
+import validator from 'validator';
 
 export const getBoards = async (req, res) => {
   const { user } = req
@@ -8,6 +9,9 @@ export const getBoards = async (req, res) => {
 
 export const getBoardById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM board WHERE id = $1', [id])
   if (rows.length === 0) {
     res.status(404).send('Not found')
@@ -17,6 +21,9 @@ export const getBoardById = async (req, res) => {
 
 export const deleteBoardById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM board WHERE id = $1', [id])
   if (rows.length === 0) {
     res.status(404).send('Not found')
@@ -28,6 +35,9 @@ export const deleteBoardById = async (req, res) => {
 
 export const updateBoardById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM board WHERE id = $1', [id])
   if (rows.length === 0) {
     res.status(404).send('Not found')
@@ -72,6 +82,9 @@ export const createBoard = async (req, res) => {
 
 export const updateCardListIdOrderOfBoard = async (req, res) => {
   const { boardId } = req.params
+  if (!validator.isUUID(boardId)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM board WHERE id = $1', [boardId])
   if (rows.length === 0) {
     res.status(404).send('Not found')

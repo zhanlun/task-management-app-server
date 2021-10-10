@@ -1,7 +1,11 @@
 import db from '../db/index.js'
+import validator from 'validator';
 
 export const getCardListsByBoardId = async (req, res) => {
   const { boardId } = req.params
+  if (!validator.isUUID(boardId)) {
+    return res.status(404).send('Not found')
+  }
   try {
     const { rows: boardRows } = await db.query('SELECT * FROM board WHERE id = $1', [boardId])
     if (boardRows.length === 0) {
@@ -17,6 +21,9 @@ export const getCardListsByBoardId = async (req, res) => {
 
 export const getCardListById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   try {
     const { rows } = await db.query('SELECT * FROM card_list WHERE id = $1', [id])
     res.json(rows[0])
@@ -27,6 +34,9 @@ export const getCardListById = async (req, res) => {
 
 export const createCardListByBoardId = async (req, res) => {
   const { boardId } = req.params
+  if (!validator.isUUID(boardId)) {
+    return res.status(404).send('Not found')
+  }
   const { title } = req.body
   try {
     const { rows: boardRows } = await db.query('SELECT * FROM board WHERE id = $1', [boardId])
@@ -53,6 +63,9 @@ export const createCardListByBoardId = async (req, res) => {
 
 export const deleteCardListById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM card_list WHERE id = $1', [id])
   if (rows.length === 0) {
     res.status(404).send('Not found')
@@ -67,6 +80,9 @@ export const deleteCardListById = async (req, res) => {
 
 export const updateCardListById = async (req, res) => {
   const { id } = req.params
+  if (!validator.isUUID(id)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM card_list WHERE id = $1', [id])
   if (rows.length === 0) {
     res.status(404).send('Not found')
@@ -97,6 +113,9 @@ export const updateCardListById = async (req, res) => {
 
 export const updateCardIdOrderOfCardList = async (req, res) => {
   const { cardListId } = req.params
+  if (!validator.isUUID(cardListId)) {
+    return res.status(404).send('Not found')
+  }
   const { rows } = await db.query('SELECT * FROM card_list WHERE id = $1', [cardListId])
   if (rows.length === 0) {
     res.status(404).send('Not found')
