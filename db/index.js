@@ -5,6 +5,9 @@ const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:1234
 
 const pool = new Pool({
   connectionString,
+  ssl: {
+    rejectUnauthorized: false
+  }
 })
 
 export default {
