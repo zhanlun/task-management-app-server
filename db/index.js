@@ -3,12 +3,17 @@ const { Pool } = pg
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:123456@localhost:5432/task_management_app'
 
-const pool = new Pool({
+const dbConfig = {
   connectionString,
-  ssl: {
+}
+
+if (process.env.NODE_ENV === 'production') {
+  dbConfig[ssl] = {
     rejectUnauthorized: false
   }
-})
+}
+
+const pool = new Pool(dbConfig)
 
 export default {
   query: async (text, params) => {
